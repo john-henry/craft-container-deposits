@@ -1,0 +1,13 @@
+{#
+Re-turn-mandated consumer disclosure.
+
+Re-turn's *Producer Guidance* requires that consumer-facing displays state
+the deposit is mandatory and cannot be discounted. Drop this anywhere a
+deposit line item is shown to a shopper.
+
+USAGE:
+    {% include 'store/_partials/deposits-mandatory-notice' %}
+#}
+<span class="text-xs text-gray-500 italic">
+    {{- 'Deposit is mandatory under the Re-turn DRS scheme and cannot be discounted.' -}}
+</span>

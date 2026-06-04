@@ -1,0 +1,73 @@
+{% extends "_layouts/cp" %}
+
+{% set title = "Container Deposits"|t('container-deposits') %}
+{% set fullPageForm = false %}
+
+{% set crumbs = [
+    { label: "Container Deposits"|t('container-deposits'), url: url('container-deposits') }
+] %}
+
+{% block actionButton %}
+    <a href="{{ url('container-deposits/new') }}" class="btn submit add icon">
+        {{ "New Deposit Type"|t('container-deposits') }}
+    </a>
+{% endblock %}
+
+{% block content %}
+    {% if depositTypes|length %}
+        <div class="tableview">
+            <table class="data fullwidth collapsible" id="deposittypes">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ "Name"|t('app') }}</th>
+                        <th scope="col">{{ "Handle"|t('app') }}</th>
+                        <th scope="col">{{ "Amount"|t('container-deposits') }}</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for type in depositTypes %}
+                        <tr data-id="{{ type.id }}" data-name="{{ type.name|e }}">
+                            <td>
+                                <a href="{{ url('container-deposits/' ~ type.id) }}" class="go">{{ type.name }}</a>
+                            </td>
+                            <td class="code">{{ type.handle }}</td>
+                            <td>{{ type.amount|currency }}</td>
+                            <td class="thin">
+                                <a class="delete icon" title="{{ 'Delete'|t('app') }}"
+                                   data-confirm="{{ 'Are you sure you want to delete "{name}"?'|t('container-deposits', { name: type.name }) }}"
+                                   data-action="container-deposits/deposit-types/delete"
+                                   data-id="{{ type.id }}"
+                                   href="#"></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>{{ "No deposit types yet."|t('container-deposits') }}</p>
+    {% endif %}
+{% endblock %}
+
+{% js %}
+    (function() {
+        document.querySelectorAll('[data-action="container-deposits/deposit-types/delete"]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!confirm(link.dataset.confirm)) return;
+                Craft.sendActionRequest('POST', 'container-deposits/deposit-types/delete', {
+                    data: { id: link.dataset.id }
+                }).then(function(response) {
+                    var data = response.data;
+                    if (data.success) {
+                        link.closest('tr').remove();
+                        Craft.cp.displayNotice(Craft.t('container-deposits', 'Deposit type deleted.'));
+                    } else {
+                        Craft.cp.displayError(data.error || Craft.t('app', 'An unknown error occurred.'));
+                    }
+                });
+            });
+        });
+    }());
+{% endjs %}

@@ -1,0 +1,58 @@
+{#
+Re-turn-compliant deposit block for invoice/receipt templates.
+
+Renders the dashed-border "Re-turn Deposit" table mandated by Re-turn's
+Producer Invoice Guidance, with one row per deposit tier (15c, 25c, ...)
+and a total. Returns nothing if the order has no deposit line items.
+
+USAGE in your invoice/receipt template:
+
+    {% include 'store/_partials/invoice-block' with {
+        order: order,
+    } only %}
+
+OR (anywhere a `cart` is in scope):
+
+    {% include 'store/_partials/invoice-block' with {
+        order: cart,
+    } only %}
+
+@var order \craft\commerce\elements\Order
+#}
+
+{% set deposits = craft.containerDeposits.lineItemsFor(order) %}
+
+{% if deposits|length %}
+    {% set depositTotal = craft.containerDeposits.totalFor(order) %}
+
+    <table class="re-turn-deposit-block" style="border: 1px dashed #d63384; padding: 0.75rem; border-collapse: collapse; width: 100%; margin: 1rem 0;">
+        <thead>
+            <tr>
+                <th align="left">{{ 'Re-turn Deposit' }}</th>
+                <th align="right">{{ 'No. of Units' }}</th>
+                <th align="right">{{ 'Deposit per unit' }}</th>
+                <th align="right">{{ 'Total' }}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in deposits %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td align="right">{{ item.qty }}</td>
+                <td align="right">{{ item.price|commerceCurrency(order.currency) }}</td>
+                <td align="right">{{ (item.price * item.qty)|commerceCurrency(order.currency) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" align="right">
+                    <strong>{{ 'Total Re-turn Deposit' }}</strong>
+                </td>
+                <td align="right">
+                    <strong>{{ depositTotal|commerceCurrency(order.currency) }}</strong>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+{% endif %}

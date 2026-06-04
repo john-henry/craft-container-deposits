@@ -1,0 +1,82 @@
+{#
+Re-turn-compliant RETAILER RECEIPT block.
+
+Renders the deposit section in the format mandated by Re-turn's Retailer
+Toolkit: a "Deposit" header followed by one row per tier in the format
+"25c × N Unit ... €X.XX", followed by the grand TOTAL (Net + Deposit).
+
+This is the B2C till-receipt format. For the B2B producer invoice format
+with the dashed-border table, use invoice-block.twig instead.
+
+USAGE in your receipt template (replaces the products/totals block):
+
+    {% include 'store/_partials/receipt-block' with {
+        order: order,
+    } only %}
+
+@var order \craft\commerce\elements\Order
+#}
+
+{% set products = craft.containerDeposits.productLineItemsFor(order) %}
+{% set deposits = craft.containerDeposits.lineItemsFor(order) %}
+{% set productSubtotal = craft.containerDeposits.productSubtotalFor(order) %}
+{% set depositTotal = craft.containerDeposits.totalFor(order) %}
+
+<table width="100%" class="receipt" style="font-size: small;">
+    {# Products #}
+    {% for item in products %}
+        <tr>
+            <td>{{ item.description }}</td>
+            <td align="right">{{ item.subtotal|commerceCurrency(order.currency) }}</td>
+        </tr>
+    {% endfor %}
+
+    {# Total Net #}
+    <tr>
+        <td style="border-top: 1px solid #000; padding-top: 4px;">
+            <strong>{{ 'Total Net' }}</strong>
+        </td>
+        <td align="right" style="border-top: 1px solid #000; padding-top: 4px;">
+            <strong>{{ productSubtotal|commerceCurrency(order.currency) }}</strong>
+        </td>
+    </tr>
+
+    {% if deposits|length %}
+        {# Deposit section header #}
+        <tr>
+            <td colspan="2" style="padding-top: 12px;">{{ 'Deposit' }}</td>
+        </tr>
+        {# Deposit rows in "25c × N Unit" format #}
+        {% for item in deposits %}
+            {% set perUnit = craft.containerDeposits.formatAmount(item.price, order.currency) %}
+            <tr>
+                <td>
+                    {{ perUnit }} × {{ item.qty }} {{ (item.qty == 1 ? 'Unit' : 'Units') }}
+                </td>
+                <td align="right">{{ (item.price * item.qty)|commerceCurrency(order.currency) }}</td>
+            </tr>
+        {% endfor %}
+    {% endif %}
+
+    {# Grand total #}
+    <tr>
+        <td style="border-top: 1px solid #000; padding-top: 4px;">
+            <strong>{{ 'TOTAL' }}</strong>
+        </td>
+        <td align="right" style="border-top: 1px solid #000; padding-top: 4px;">
+            <strong>{{ (productSubtotal + depositTotal)|commerceCurrency(order.currency) }}</strong>
+        </td>
+    </tr>
+    {% if deposits|length %}
+        <tr>
+            <td colspan="2" style="font-size: x-small; color: #666;">
+                ({{ 'Total NET + Deposit' }})
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding-top: 8px;">
+                {% include 'store/_partials/deposits-mandatory-notice' only %}
+            </td>
+        </tr>
+    {% endif %}
+</table>

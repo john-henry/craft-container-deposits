@@ -1,0 +1,32 @@
+{#
+Re-turn-compliant price + deposit display for product cards / product pages.
+
+Renders the price line followed by "+ 15c Deposit" (or "+ 90c Deposit" etc.)
+on a new line, matching Re-turn's official producer guidance.
+
+USAGE:
+
+    {% include 'store/_partials/product-price-deposit' with {
+        purchasable: variant,
+    } only %}
+
+OR with a custom price label (e.g. to include a per-litre suffix):
+
+    {% include 'store/_partials/product-price-deposit' with {
+        purchasable: variant,
+        priceLabel: variant.priceAsCurrency ~ ' (' ~ pricePerLitre ~ '/litre)',
+    } only %}
+
+@var purchasable craft\commerce\base\Purchasable
+@var priceLabel string|null  Custom price label override
+#}
+
+{% set price = priceLabel ?? purchasable.salePriceAsCurrency %}
+{% set deposit = craft.containerDeposits.displayFor(purchasable) %}
+
+<div class="product-price-deposit">
+    <div class="price font-semibold">{{ price }}</div>
+    {% if deposit %}
+        <div class="deposit text-gray-500 text-sm">{{ deposit }}</div>
+    {% endif %}
+</div>

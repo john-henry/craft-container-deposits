@@ -1,0 +1,68 @@
+{
+  "name": "johnhenry/craft-container-deposits",
+  "description": "Container deposits for Craft Commerce - Re-turn (Ireland) ready",
+  "type": "craft-plugin",
+  "version": "1.0.0",
+  "keywords": [
+    "craft",
+    "cms",
+    "craftcms",
+    "craft-commerce",
+    "craft-plugin",
+    "deposit",
+    "drs",
+    "container-deposits"
+  ],
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "John Henry",
+      "homepage": "https://johnhenry.ie"
+    }
+  ],
+  "homepage": "https://plugins.johnhenry.ie/container-deposits",
+  "require": {
+    "php": "^8.2 || ^8.3 || ^8.4",
+    "craftcms/cms": "^5.0",
+    "craftcms/commerce": "^5.0"
+  },
+  "require-dev": {
+    "craftcms/ecs": "dev-main",
+    "craftcms/phpstan": "dev-main"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "johnhenry\\containerdeposits\\": "src/"
+    }
+  },
+  "scripts": {
+    "phpstan": "phpstan --ansi --memory-limit=1G",
+    "check-cs": "ecs check --ansi",
+    "fix-cs": "ecs check --fix --ansi"
+  },
+  "config": {
+    "allow-plugins": {
+      "craftcms/plugin-installer": true,
+      "pestphp/pest-plugin": true,
+      "yiisoft/yii2-composer": true
+    },
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "support": {
+    "docs": "https://plugins.johnhenry.ie/container-deposits",
+    "source": "https://github.com/john-henry/craft-container-deposits",
+    "issues": "https://github.com/john-henry/craft-container-deposits/issues"
+  },
+  "extra": {
+    "name": "Container Deposits",
+    "handle": "container-deposits",
+    "developer": "John Henry",
+    "developerUrl": "https://johnhenry.ie",
+    "documentationUrl": "https://plugins.johnhenry.ie/container-deposits/",
+    "changelogUrl": "https://github.com/john-henry/container-deposits/blob/craft-5/CHANGELOG.md",
+    "class": "johnhenry\\containerdeposits\\ContainerDeposits"
+  }
+}
