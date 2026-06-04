@@ -62,7 +62,7 @@
     "developer": "John Henry",
     "developerUrl": "https://johnhenry.ie",
     "documentationUrl": "https://plugins.johnhenry.ie/container-deposits/",
-    "changelogUrl": "https://github.com/john-henry/container-deposits/blob/craft-5/CHANGELOG.md",
+    "changelogUrl": "https://github.com/john-henry/craft-container-deposits/blob/craft-5/CHANGELOG.md",
     "class": "johnhenry\\containerdeposits\\ContainerDeposits"
   }
 }
