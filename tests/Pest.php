@@ -3,7 +3,7 @@
 /**
  * Pest harness for the Container Deposits plugin.
  *
- * Feature tests run without a Craft application instance — any test that
+ * Feature tests run without a Craft application instance; any test that
  * touches Craft::$app or Craft::t() must live under Integration/ and use the
  * RefreshesDatabase trait so the test DB is rolled back after each test.
  *
@@ -41,7 +41,7 @@ beforeEach(function () {
 // ---------------------------------------------------------------------------
 
 /**
- * Creates (or reuses) a deposit type by handle. Upsert-style — if a deposit
+ * Creates (or reuses) a deposit type by handle. Upsert-style: if a deposit
  * type already exists with the same handle (e.g. left behind by CP usage
  * outside of tests), it is updated and returned so tests can run idempotently
  * against any DB state.

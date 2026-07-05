@@ -8,6 +8,6 @@ deposit line item is shown to a shopper.
 USAGE:
     {% include 'store/_partials/deposits-mandatory-notice' %}
 #}
-<span class="text-xs text-gray-500 italic">
-    {{- 'Deposit is mandatory under the Re-turn DRS scheme and cannot be discounted.' -}}
-</span>
+<p role="note" class="text-xs text-gray-500 italic">
+    {{- 'Deposit is mandatory under the Re-turn DRS scheme and cannot be discounted.'|t('container-deposits') -}}
+</p>

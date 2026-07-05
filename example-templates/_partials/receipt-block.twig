@@ -33,9 +33,9 @@ USAGE in your receipt template (replaces the products/totals block):
 
     {# Total Net #}
     <tr>
-        <td style="border-top: 1px solid #000; padding-top: 4px;">
-            <strong>{{ 'Total Net' }}</strong>
-        </td>
+        <th scope="row" align="left" style="border-top: 1px solid #000; padding-top: 4px;">
+            <strong>{{ 'Total Net'|t('container-deposits') }}</strong>
+        </th>
         <td align="right" style="border-top: 1px solid #000; padding-top: 4px;">
             <strong>{{ productSubtotal|commerceCurrency(order.currency) }}</strong>
         </td>
@@ -44,14 +44,14 @@ USAGE in your receipt template (replaces the products/totals block):
     {% if deposits|length %}
         {# Deposit section header #}
         <tr>
-            <td colspan="2" style="padding-top: 12px;">{{ 'Deposit' }}</td>
+            <th scope="row" colspan="2" align="left" style="padding-top: 12px;">{{ 'Deposit'|t('container-deposits') }}</th>
         </tr>
         {# Deposit rows in "25c × N Unit" format #}
         {% for item in deposits %}
             {% set perUnit = craft.containerDeposits.formatAmount(item.price, order.currency) %}
             <tr>
                 <td>
-                    {{ perUnit }} × {{ item.qty }} {{ (item.qty == 1 ? 'Unit' : 'Units') }}
+                    {{ perUnit }} × {{ item.qty }} {{ (item.qty == 1 ? 'Unit'|t('container-deposits') : 'Units'|t('container-deposits')) }}
                 </td>
                 <td align="right">{{ (item.price * item.qty)|commerceCurrency(order.currency) }}</td>
             </tr>
@@ -60,18 +60,18 @@ USAGE in your receipt template (replaces the products/totals block):
 
     {# Grand total #}
     <tr>
-        <td style="border-top: 1px solid #000; padding-top: 4px;">
-            <strong>{{ 'TOTAL' }}</strong>
-        </td>
+        <th scope="row" align="left" style="border-top: 1px solid #000; padding-top: 4px;">
+            <strong>{{ 'TOTAL'|t('container-deposits') }}</strong>
+        </th>
         <td align="right" style="border-top: 1px solid #000; padding-top: 4px;">
             <strong>{{ (productSubtotal + depositTotal)|commerceCurrency(order.currency) }}</strong>
         </td>
     </tr>
     {% if deposits|length %}
         <tr>
-            <td colspan="2" style="font-size: x-small; color: #666;">
-                ({{ 'Total NET + Deposit' }})
-            </td>
+            <th scope="row" colspan="2" align="left" style="font-size: x-small; color: #666; font-weight: normal;">
+                ({{ 'Total NET + Deposit'|t('container-deposits') }})
+            </th>
         </tr>
         <tr>
             <td colspan="2" style="padding-top: 8px;">

@@ -15,11 +15,11 @@ use craft\fields\Number;
  * unit of the purchasable. For a single 500 ml bottle this is 1; for a 6-pack
  * it is 6; for a tray of 24 cans it is 24.
  *
- * The cart service multiplies a line item's qty by this value when summing the
- * expected deposit qty, so a cart of 2 × 6-packs produces 12 deposits.
+ * The cart service multiplies a line item's qty by this value when working out
+ * the expected deposit qty, so a cart of 2 × 6-packs comes to 12 deposits.
  *
- * Defaults to 1 if missing, so products without the field behave exactly as
- * before — backwards-compatible.
+ * If the field isn't on the layout, or is left empty, the count falls back to
+ * 1 and the product just gets a single deposit per unit.
  *
  * @author JohnHenry <info@johnhenry.ie>
  * @since 1.0.0
@@ -96,9 +96,9 @@ class ContainerCountField extends Number
      */
     public function normalizeValue(mixed $value, ?ElementInterface $element = null): mixed
     {
-        // Check the raw value first — parent::normalizeValue() would substitute
-        // the field's configured defaultValue for null and prevent
-        // $defaultContainerCount from ever being used.
+        // Handle an empty value ourselves first. If we let the parent see it,
+        // it swaps in the field's own defaultValue and our defaultContainerCount
+        // never gets a look in.
         if ($value === null || $value === '') {
             return $this->defaultContainerCount;
         }

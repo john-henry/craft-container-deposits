@@ -96,7 +96,7 @@ class Install extends Migration
         $taxCategory = new TaxCategory();
         $taxCategory->name = 'Container Deposits (No VAT)';
         $taxCategory->handle = self::TAX_CATEGORY_HANDLE;
-        $taxCategory->description = 'Irish DRS deposits — treated as outside the scope of VAT by Revenue.';
+        $taxCategory->description = 'Irish DRS deposits, treated as outside the scope of VAT by Revenue.';
         $taxCategory->default = false;
 
         $commerce->getTaxCategories()->saveTaxCategory($taxCategory);

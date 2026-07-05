@@ -20,6 +20,7 @@ use craft\web\UrlManager;
 use johnhenry\containerdeposits\elements\DepositPurchasable;
 use johnhenry\containerdeposits\fields\ContainerCountField;
 use johnhenry\containerdeposits\fields\DepositTypeField;
+use johnhenry\containerdeposits\jobs\ResaveDepositPurchasables;
 use johnhenry\containerdeposits\services\DepositCartService;
 use johnhenry\containerdeposits\services\DepositTypeService;
 use johnhenry\containerdeposits\variables\ContainerDepositsVariable;
@@ -30,9 +31,10 @@ use yii\base\ModelEvent;
 /**
  * Container Deposits plugin.
  *
- * Adds Irish DRS (Deposit Return Scheme) container deposits to Craft Commerce:
- * configurable deposit types, synthetic deposit purchasables, automatic cart
- * line-item syncing, and Re-turn-compliant invoice/receipt rendering.
+ * Adds container deposits to Craft Commerce for any deposit return scheme,
+ * Ireland's Re-turn or your own region's equivalent: configurable deposit
+ * types, synthetic deposit purchasables, automatic cart line-item syncing, and
+ * Re-turn-ready invoice/receipt rendering.
  *
  * @property-read DepositTypeService $depositTypes
  * @property-read null|array $cpNavItem
@@ -240,8 +242,10 @@ class ContainerDeposits extends BasePlugin
     }
 
     /**
-     * Re-propagate every DepositPurchasable when a new site is added, so the
-     * cart sync can resolve deposits in the new site straight away.
+     * Re-propagates every DepositPurchasable when a new site is added, so the
+     * cart sync can find its deposits on the new site right away. The resave
+     * runs on the queue rather than inline, so adding a site doesn't hang on
+     * however many purchasables and sites are in play.
      *
      * @return void
      * @author JohnHenry <info@johnhenry.ie>
@@ -256,25 +260,10 @@ class ContainerDeposits extends BasePlugin
                 if (!$event->isNew) {
                     return;
                 }
-                foreach ($this->getDepositTypes()->getAllDepositTypes() as $depositType) {
-                    if (!$depositType->purchasableId) {
-                        continue;
-                    }
-                    $purchasable = Craft::$app->getElements()->getElementById(
-                        $depositType->purchasableId,
-                        DepositPurchasable::class,
-                    );
-                    if ($purchasable) {
-                        // Re-saving triggers Craft to fill in the new site's
-                        // elements_sites row via getSupportedSites().
-                        Craft::$app->getElements()->saveElement($purchasable, false);
-                    }
-                }
+                Craft::$app->getQueue()->push(new ResaveDepositPurchasables());
             }
         );
     }
-
-
 
     /**
      * Registers the plugin's control panel URL rules.
@@ -295,7 +284,6 @@ class ContainerDeposits extends BasePlugin
                     'container-deposits/<id:\d+>' => 'container-deposits/deposit-types/edit',
                     'container-deposits/save' => 'container-deposits/deposit-types/save',
                     'container-deposits/delete' => 'container-deposits/deposit-types/delete',
-                    'container-deposits/reorder' => 'container-deposits/deposit-types/reorder',
                 ], $event->rules);
             }
         );

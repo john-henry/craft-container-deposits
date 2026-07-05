@@ -86,6 +86,21 @@ class DepositPurchasable extends Purchasable
     /**
      * @inheritdoc
      *
+     * A deposit purchasable is a fixed-fee line item with no stock to track;
+     * it must never appear on Commerce's Inventory index.
+     *
+     * @return bool Whether this purchasable type has inventory.
+     * @author JohnHenry <info@johnhenry.ie>
+     * @since 1.0.0
+     */
+    public static function hasInventory(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     *
      * @return DepositPurchasableQuery The element query.
      * @author JohnHenry <info@johnhenry.ie>
      * @since 1.0.0
@@ -99,15 +114,13 @@ class DepositPurchasable extends Purchasable
     // =========================================================================
 
     /**
-     * Multi-site / multi-store support.
+     * Puts the purchasable on every enabled site.
      *
-     * DepositPurchasable elements are synthetic — there's no merchandiser
-     * choosing which sites they live on. We propagate them to every enabled
-     * site so the cart sync can resolve the deposit purchasable on any
-     * store/site combination.
-     *
-     * Tax categories and the deposit-types list itself are installation-wide
-     * in Commerce 5, so a single saved DepositPurchasable serves all stores.
+     * Nobody picks the sites for these, they're created by the plugin, so we
+     * just propagate to every enabled site and the cart sync can always find
+     * the right deposit whatever site or store it's running in. Disabled sites
+     * are skipped, no sense keeping `elements_sites` rows for a site that can't
+     * serve a front-end.
      *
      * @return array The supported site definitions.
      * @author JohnHenry <info@johnhenry.ie>
@@ -117,6 +130,9 @@ class DepositPurchasable extends Purchasable
     {
         $siteIds = [];
         foreach (Craft::$app->getSites()->getAllSites() as $site) {
+            if (!$site->getEnabled()) {
+                continue;
+            }
             $siteIds[] = [
                 'siteId' => $site->id,
                 'propagate' => true,
@@ -241,14 +257,17 @@ class DepositPurchasable extends Purchasable
     /**
      * @inheritdoc
      *
+     * A deposit type is available whenever it still exists, including
+     * intentional zero-amount tiers (e.g. a "free return" promotion). Only a
+     * missing/deleted deposit type makes the purchasable unavailable.
+     *
      * @return bool Whether the purchasable is available for purchase.
      * @author JohnHenry <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function getIsAvailable(): bool
     {
-        $type = $this->getDepositType();
-        return $type !== null && $type->amount > 0;
+        return $this->getDepositType() !== null;
     }
 
     /**

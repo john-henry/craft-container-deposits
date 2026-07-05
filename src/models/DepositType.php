@@ -8,6 +8,7 @@ namespace johnhenry\containerdeposits\models;
 
 use Craft;
 use craft\base\Model;
+use johnhenry\containerdeposits\records\DepositTypeRecord;
 
 /**
  * Deposit type model.
@@ -76,8 +77,38 @@ class DepositType extends Model
             [['name', 'handle'], 'required'],
             [['name', 'handle'], 'string', 'max' => 255],
             [['handle'], 'match', 'pattern' => '/^[a-zA-Z][a-zA-Z0-9_]*$/', 'message' => Craft::t('container-deposits', '{attribute} must start with a letter and contain only letters, numbers, and underscores.')],
+            [['handle'], 'validateHandleUniqueness'],
             [['amount'], 'number', 'min' => 0],
             [['amount'], 'required'],
         ];
+    }
+
+    /**
+     * Validates that the handle isn't already in use by another deposit type.
+     * Registered as an inline validator via {@see defineRules()}.
+     *
+     * @param string $attribute The attribute being validated (always "handle").
+     * @return void
+     * @author JohnHenry <info@johnhenry.ie>
+     * @since 1.0.0
+     */
+    public function validateHandleUniqueness(string $attribute): void
+    {
+        if ($this->$attribute === '') {
+            return;
+        }
+
+        $query = DepositTypeRecord::find()->where(['handle' => $this->$attribute]);
+
+        if ($this->id !== null) {
+            $query->andWhere(['not', ['id' => $this->id]]);
+        }
+
+        if ($query->exists()) {
+            $this->addError($attribute, Craft::t('container-deposits', '{attribute} "{handle}" has already been taken.', [
+                'attribute' => 'Handle',
+                'handle' => $this->$attribute,
+            ]));
+        }
     }
 }

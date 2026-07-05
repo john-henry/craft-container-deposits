@@ -13,6 +13,7 @@ return [
     'Deposit type not found.' => 'Deposit type not found.',
     'No deposit types yet.' => 'No deposit types yet.',
     'Are you sure you want to delete "{name}"?' => 'Are you sure you want to delete "{name}"?',
+    'Delete {name}' => 'Delete {name}',
     'Amount' => 'Amount',
     'Deposit' => 'Deposit',
     'Deposits' => 'Deposits',
@@ -28,10 +29,15 @@ return [
 
     // Validation
     '{attribute} must start with a letter and contain only letters, numbers, and underscores.' => '{attribute} must start with a letter and contain only letters, numbers, and underscores.',
+    '{attribute} "{handle}" has already been taken.' => '{attribute} "{handle}" has already been taken.',
     'No deposit type exists with the ID "{id}".' => 'No deposit type exists with the ID "{id}".',
+    'Couldn\'t sync the deposit purchasable.' => 'Couldn\'t sync the deposit purchasable.',
+
+    // Queue job
+    'Propagating deposit purchasables to all sites' => 'Propagating deposit purchasables to all sites',
 
     // Product display helpers
-    '+ ' => '+ ',
+    '+ {amount} Deposit' => '+ {amount} Deposit',
 
     // Till receipt block
     'Total Net' => 'Total Net',

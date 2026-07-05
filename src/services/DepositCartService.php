@@ -74,7 +74,7 @@ class DepositCartService extends Component
     }
 
     /**
-     * Returns the deposit line items on the order, grouped by deposit type.
+     * Returns the deposit line items on the order.
      *
      * @param Order $order The order to read line items from.
      * @return LineItem[] The deposit line items.
@@ -229,15 +229,20 @@ class DepositCartService extends Component
             }
         }
 
-        // Build expected deposits: keyed by depositTypeId → ['type', 'totalQty']
-        // qty is multiplied by the container count on the purchasable (defaults to 1).
+        // The same purchasable can show up on more than one line, so cache the
+        // field lookups for this pass instead of scanning its layout each time.
+        $depositTypeCache = [];
+        $containerCountCache = [];
+
+        // Work out what deposits the cart should have, keyed by deposit type.
+        // Qty is the product qty times the containers per unit (1 by default).
         $expectedDeposits = [];
         foreach ($regularItems as $item) {
-            $depositType = $this->_getDepositTypeForLineItem($item);
+            $depositType = $this->_getDepositTypeForLineItem($item, $depositTypeCache);
             if (!$depositType || !$depositType->purchasableId) {
                 continue;
             }
-            $containers = $this->_getContainerCountForLineItem($item);
+            $containers = $this->_getContainerCountForLineItem($item, $containerCountCache);
             $key = $depositType->id;
             if (!isset($expectedDeposits[$key])) {
                 $expectedDeposits[$key] = ['type' => $depositType, 'qty' => 0];
@@ -245,7 +250,21 @@ class DepositCartService extends Component
             $expectedDeposits[$key]['qty'] += $item->qty * $containers;
         }
 
-        // Match existing deposit items to expected, updating qty in place
+        // Grab the current qty of each deposit line before we touch anything.
+        // These are the same objects we mutate below, so if we don't take a
+        // plain-scalar copy now, the "did the qty change?" check later always
+        // comes back equal.
+        $originalQtyByDepositTypeId = [];
+        foreach ($depositItems as $depositItem) {
+            $depositTypeId = (int)($depositItem->options['_depositTypeId'] ?? 0);
+            if ($depositTypeId) {
+                $originalQtyByDepositTypeId[$depositTypeId] = $depositItem->qty;
+            }
+        }
+
+        // Match the deposit lines we already have to what's expected, fixing
+        // the qty as we go. Any deposit line with no matching product is left
+        // out on purpose, that's how orphans get dropped.
         $reconciledDeposits = [];
         foreach ($depositItems as $depositItem) {
             $depositTypeId = (int)($depositItem->options['_depositTypeId'] ?? 0);
@@ -254,10 +273,9 @@ class DepositCartService extends Component
                 $reconciledDeposits[$depositTypeId] = $depositItem;
                 unset($expectedDeposits[$depositTypeId]);
             }
-            // Orphaned deposit items are intentionally excluded
         }
 
-        // Create new deposit line items for anything not yet reconciled
+        // Anything still left in $expectedDeposits needs a brand new line.
         foreach ($expectedDeposits as $depositTypeId => $data) {
             /** @var DepositType $depositType */
             $depositType = $data['type'];
@@ -267,23 +285,18 @@ class DepositCartService extends Component
             }
         }
 
-        // Only call setLineItems if something actually changed
+        // Only write the line items back if the set actually changed.
         $newItems = array_merge($regularItems, array_values($reconciledDeposits));
         if (count($newItems) !== count($allItems)) {
             $order->setLineItems($newItems);
             return;
         }
 
-        // Check for qty differences on existing deposits
+        // Same count, so check whether any deposit qty moved against the
+        // snapshot we took earlier.
         foreach ($reconciledDeposits as $depositTypeId => $depositItem) {
-            $original = null;
-            foreach ($depositItems as $d) {
-                if ((int)($d->options['_depositTypeId'] ?? 0) === $depositTypeId) {
-                    $original = $d;
-                    break;
-                }
-            }
-            if (!$original || $original->qty !== $depositItem->qty) {
+            $originalQty = $originalQtyByDepositTypeId[$depositTypeId] ?? null;
+            if ($originalQty === null || $originalQty !== $depositItem->qty) {
                 $order->setLineItems($newItems);
                 return;
             }
@@ -291,39 +304,65 @@ class DepositCartService extends Component
     }
 
     /**
-     * Resolves the deposit type assigned to a line item's purchasable.
+     * Resolves the deposit type assigned to a line item's purchasable, reusing a
+     * per-sync cache keyed by purchasable ID.
      *
      * @param LineItem $lineItem The line item to inspect.
+     * @param array<int, DepositType|null> $cache Per-sync deposit-type cache, keyed by purchasable ID.
      * @return DepositType|null The assigned deposit type, or null.
      * @throws InvalidFieldException
      * @since 1.0.0
      * @author JohnHenry <info@johnhenry.ie>
      */
-    private function _getDepositTypeForLineItem(LineItem $lineItem): ?DepositType
+    private function _getDepositTypeForLineItem(LineItem $lineItem, array &$cache): ?DepositType
     {
         $purchasable = $lineItem->getPurchasable();
         if (!$purchasable instanceof ElementInterface) {
             return null;
         }
-        return $this->getDepositTypeForPurchasable($purchasable);
+
+        $id = $purchasable->id;
+        if ($id !== null && array_key_exists($id, $cache)) {
+            return $cache[$id];
+        }
+
+        $depositType = $this->getDepositTypeForPurchasable($purchasable);
+        if ($id !== null) {
+            $cache[$id] = $depositType;
+        }
+
+        return $depositType;
     }
 
     /**
-     * Resolves the container count for a line item's purchasable.
+     * Resolves the container count for a line item's purchasable, reusing a
+     * per-sync cache keyed by purchasable ID.
      *
      * @param LineItem $lineItem The line item to inspect.
+     * @param array<int, int> $cache Per-sync container-count cache, keyed by purchasable ID.
      * @return int The container count per unit.
      * @throws InvalidFieldException
      * @since 1.0.0
      * @author JohnHenry <info@johnhenry.ie>
      */
-    private function _getContainerCountForLineItem(LineItem $lineItem): int
+    private function _getContainerCountForLineItem(LineItem $lineItem, array &$cache): int
     {
         $purchasable = $lineItem->getPurchasable();
         if (!$purchasable instanceof ElementInterface) {
             return 1;
         }
-        return $this->getContainerCountForPurchasable($purchasable);
+
+        $id = $purchasable->id;
+        if ($id !== null && array_key_exists($id, $cache)) {
+            return $cache[$id];
+        }
+
+        $count = $this->getContainerCountForPurchasable($purchasable);
+        if ($id !== null) {
+            $cache[$id] = $count;
+        }
+
+        return $count;
     }
 
     /**

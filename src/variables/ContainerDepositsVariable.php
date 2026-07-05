@@ -107,7 +107,7 @@ class ContainerDepositsVariable
 
     /**
      * Total qty across product (non-deposit) line items on the order.
-     * Use for cart-icon badges — shoppers count products, not the deposits
+     * Use for cart-icon badges: shoppers count products, not the deposits
      * the plugin auto-adds.
      *
      * @param Order $order The order to total.
@@ -222,7 +222,9 @@ class ContainerDepositsVariable
             return '';
         }
 
-        return Craft::t('container-deposits', '+ ') . $this->formatAmount($amount) . ' ' . Craft::t('container-deposits', 'Deposit');
+        return Craft::t('container-deposits', '+ {amount} Deposit', [
+            'amount' => $this->formatAmount($amount),
+        ]);
     }
 
     /**
