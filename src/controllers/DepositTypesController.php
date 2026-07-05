@@ -22,7 +22,7 @@ use yii\web\Response;
  * Deposit Types controller.
  *
  * Handles the control panel CRUD screens for deposit types: listing, editing,
- * saving, deleting, and reordering. All actions require an admin account.
+ * saving, and deleting. All actions require an admin account.
  *
  * @author JohnHenry <info@johnhenry.ie>
  * @since 1.0.0
@@ -95,7 +95,7 @@ class DepositTypesController extends Controller
      */
     public function actionSave(): ?Response
     {
-        $this->requireAdmin();
+        $this->requireAdmin(false);
         $this->requirePostRequest();
 
         $request = Craft::$app->getRequest();
@@ -141,7 +141,7 @@ class DepositTypesController extends Controller
      */
     public function actionDelete(): Response
     {
-        $this->requireAdmin();
+        $this->requireAdmin(false);
         $this->requirePostRequest();
         $this->requireAcceptsJson();
 
@@ -149,35 +149,6 @@ class DepositTypesController extends Controller
 
         if (!ContainerDeposits::getInstance()->depositTypes->deleteDepositTypeById((int)$id)) {
             return $this->asJson(['success' => false, 'error' => Craft::t('container-deposits', 'Could not delete deposit type.')]);
-        }
-
-        return $this->asJson(['success' => true]);
-    }
-
-    /**
-     * Reorders the deposit types.
-     *
-     * @return Response A JSON success response.
-     * @throws BadRequestHttpException if the request isn't a POST/JSON request.
-     * @throws Throwable if a deposit type can't be saved.
-     * @author JohnHenry <info@johnhenry.ie>
-     * @since 1.0.0
-     */
-    public function actionReorder(): Response
-    {
-        $this->requireAdmin();
-        $this->requirePostRequest();
-        $this->requireAcceptsJson();
-
-        $ids = Craft::$app->getRequest()->getRequiredBodyParam('ids');
-        $service = ContainerDeposits::getInstance()->depositTypes;
-
-        foreach ($ids as $sortOrder => $id) {
-            $type = $service->getDepositTypeById((int)$id);
-            if ($type) {
-                $type->sortOrder = $sortOrder + 1;
-                $service->saveDepositType($type);
-            }
         }
 
         return $this->asJson(['success' => true]);

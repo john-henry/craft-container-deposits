@@ -28,10 +28,10 @@ OR (anywhere a `cart` is in scope):
     <table class="re-turn-deposit-block" style="border: 1px dashed #d63384; padding: 0.75rem; border-collapse: collapse; width: 100%; margin: 1rem 0;">
         <thead>
             <tr>
-                <th align="left">{{ 'Re-turn Deposit' }}</th>
-                <th align="right">{{ 'No. of Units' }}</th>
-                <th align="right">{{ 'Deposit per unit' }}</th>
-                <th align="right">{{ 'Total' }}</th>
+                <th scope="col" align="left">{{ 'Re-turn Deposit'|t('container-deposits') }}</th>
+                <th scope="col" align="right">{{ 'No. of Units'|t('container-deposits') }}</th>
+                <th scope="col" align="right">{{ 'Deposit per unit'|t('container-deposits') }}</th>
+                <th scope="col" align="right">{{ 'Total'|t('container-deposits') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -46,9 +46,9 @@ OR (anywhere a `cart` is in scope):
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" align="right">
-                    <strong>{{ 'Total Re-turn Deposit' }}</strong>
-                </td>
+                <th scope="row" colspan="3" align="right">
+                    <strong>{{ 'Total Re-turn Deposit'|t('container-deposits') }}</strong>
+                </th>
                 <td align="right">
                     <strong>{{ depositTotal|commerceCurrency(order.currency) }}</strong>
                 </td>

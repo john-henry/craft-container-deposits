@@ -102,9 +102,14 @@ class DepositTypeService extends Component
     /**
      * Validates and saves a deposit type, syncing its backing purchasable.
      *
+     * The record save and purchasable sync run inside a single transaction: if
+     * the purchasable can't be created, the whole save is rolled back and the
+     * method returns `false`, rather than persisting a record with a null
+     * `purchasableId` that can never sync to a cart.
+     *
      * @param DepositType $model The deposit type to save.
      * @return bool Whether the deposit type was saved successfully.
-     * @throws Throwable if the backing purchasable can't be saved.
+     * @throws Throwable if the transaction can't be rolled back.
      * @author JohnHenry <info@johnhenry.ie>
      * @since 1.0.0
      */
@@ -131,15 +136,29 @@ class DepositTypeService extends Component
         $record->amount = $model->amount;
         $record->sortOrder = $model->sortOrder ?? 99;
 
-        if (!$record->save()) {
-            return false;
-        }
+        $transaction = Craft::$app->getDb()->beginTransaction();
 
-        $model->id = $record->id;
+        try {
+            if (!$record->save()) {
+                $transaction->rollBack();
+                return false;
+            }
 
-        // Create or update the purchasable element for this deposit type
-        if (!$this->_syncPurchasable($model)) {
-            Craft::warning('Failed to sync purchasable for deposit type ' . $model->handle, 'container-deposits');
+            $model->id = $record->id;
+
+            // Create or update the purchasable element for this deposit type.
+            // A failed sync must roll the record save back too, otherwise the
+            // admin sees "saved" but the deposit can never reach a cart.
+            if (!$this->_syncPurchasable($model)) {
+                $model->addError('purchasableId', Craft::t('container-deposits', 'Couldn\'t sync the deposit purchasable.'));
+                $transaction->rollBack();
+                return false;
+            }
+
+            $transaction->commit();
+        } catch (Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
         }
 
         $this->_allDepositTypes = null;
@@ -173,12 +192,15 @@ class DepositTypeService extends Component
         return true;
     }
 
-    // Private Methods
+    // Protected Methods
     // =========================================================================
 
     /**
      * Creates or updates the backing purchasable element for a deposit type and
      * stores the resulting element ID back on the deposit type record.
+     *
+     * Protected (not private) so tests can override it to simulate a sync
+     * failure and assert the surrounding transaction rolls back.
      *
      * @param DepositType $depositType The deposit type to sync.
      * @return bool Whether the purchasable was synced successfully.
@@ -186,7 +208,7 @@ class DepositTypeService extends Component
      * @author JohnHenry <info@johnhenry.ie>
      * @since 1.0.0
      */
-    private function _syncPurchasable(DepositType $depositType): bool
+    protected function _syncPurchasable(DepositType $depositType): bool
     {
         $record = DepositTypeRecord::findOne($depositType->id);
         if (!$record) {
@@ -218,6 +240,9 @@ class DepositTypeService extends Component
         $depositType->purchasableId = $purchasable->id;
         return true;
     }
+
+    // Private Methods
+    // =========================================================================
 
     /**
      * Builds a deposit type model from its active record.

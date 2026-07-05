@@ -1,8 +1,8 @@
 {
   "name": "johnhenry/craft-container-deposits",
-  "description": "Container deposits for Craft Commerce - Re-turn (Ireland) ready",
+  "description": "Container deposits for Craft Commerce - built for any deposit return scheme, Re-turn (Ireland) ready out of the box",
   "type": "craft-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "craft",
     "cms",
@@ -20,7 +20,7 @@
       "homepage": "https://johnhenry.ie"
     }
   ],
-  "homepage": "https://plugins.johnhenry.ie/container-deposits",
+  "homepage": "https://johnhenry.ie/plugins/container-deposits/",
   "require": {
     "php": "^8.2 || ^8.3 || ^8.4",
     "craftcms/cms": "^5.0",
@@ -52,7 +52,7 @@
     "sort-packages": true
   },
   "support": {
-    "docs": "https://plugins.johnhenry.ie/container-deposits",
+    "docs": "https://johnhenry.ie/plugins/container-deposits/",
     "source": "https://github.com/john-henry/craft-container-deposits",
     "issues": "https://github.com/john-henry/craft-container-deposits/issues"
   },
@@ -61,7 +61,7 @@
     "handle": "container-deposits",
     "developer": "John Henry",
     "developerUrl": "https://johnhenry.ie",
-    "documentationUrl": "https://plugins.johnhenry.ie/container-deposits/",
+    "documentationUrl": "https://johnhenry.ie/plugins/container-deposits/",
     "changelogUrl": "https://github.com/john-henry/craft-container-deposits/blob/craft-5/CHANGELOG.md",
     "class": "johnhenry\\containerdeposits\\ContainerDeposits"
   }
