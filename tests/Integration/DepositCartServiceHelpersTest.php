@@ -37,7 +37,7 @@ it('separates deposit and product line items', function () {
         depositLineItem($type->id, $type->purchasableId, 1, 0.15),
     ]);
 
-    $service = ContainerDeposits::getInstance()->depositCart;
+    $service = ContainerDeposits::getInstance()->getDepositCart();
     expect($service->getProductLineItems($order))->toHaveCount(2);
     expect($service->getDepositLineItems($order))->toHaveCount(2);
 });
@@ -51,7 +51,7 @@ it('sums deposit totals as price × qty across all deposit lines', function () {
         depositLineItem($large->id, $large->purchasableId, 4, 0.25),  // €1.00
     ]);
 
-    expect(ContainerDeposits::getInstance()->depositCart->getDepositTotal($order))
+    expect(ContainerDeposits::getInstance()->getDepositCart()->getDepositTotal($order))
         ->toEqualWithDelta(1.90, 0.001);
 });
 
@@ -59,7 +59,7 @@ it('returns zero deposit total for orders with no deposits', function () {
     $order = makeCart();
     $order->setLineItems([plainLineItem(2, 5.00)]);
 
-    expect(ContainerDeposits::getInstance()->depositCart->getDepositTotal($order))
+    expect(ContainerDeposits::getInstance()->getDepositCart()->getDepositTotal($order))
         ->toEqual(0.0);
 });
 
@@ -73,6 +73,6 @@ it('getProductSubtotal() sums product line item subtotals, excluding deposits', 
         depositLineItem($type->id, $type->purchasableId, 3, 0.15),
     ]);
 
-    $subtotal = ContainerDeposits::getInstance()->depositCart->getProductSubtotal($order);
+    $subtotal = ContainerDeposits::getInstance()->getDepositCart()->getProductSubtotal($order);
     expect($subtotal)->toEqualWithDelta(22.00, 0.001);
 });

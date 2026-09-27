@@ -53,10 +53,24 @@ USAGE in your receipt template (replaces the products/totals block):
                 <td>
                     {{ perUnit }} × {{ item.qty }} {{ (item.qty == 1 ? 'Unit'|t('container-deposits') : 'Units'|t('container-deposits')) }}
                 </td>
-                <td align="right">{{ (item.price * item.qty)|commerceCurrency(order.currency) }}</td>
+                <td align="right">{{ item.subtotal|commerceCurrency(order.currency) }}</td>
             </tr>
         {% endfor %}
     {% endif %}
+
+    {# Shipping, discounts and tax added on top, so the TOTAL is what the customer paid #}
+    {% set extras = [
+        { label: 'Shipping'|t('commerce'), amount: order.totalShippingCost },
+        { label: 'Discount'|t('commerce'), amount: order.totalDiscount },
+        { label: 'Tax'|t('commerce'), amount: order.totalTax },
+    ]|filter(row => row.amount != 0) %}
+    {% for row in extras %}
+        {% set gap = loop.first ? 'padding-top: 12px;' : '' %}
+        <tr>
+            <td style="{{ gap }}">{{ row.label }}</td>
+            <td align="right" style="{{ gap }}">{{ row.amount|commerceCurrency(order.currency) }}</td>
+        </tr>
+    {% endfor %}
 
     {# Grand total #}
     <tr>
@@ -64,15 +78,17 @@ USAGE in your receipt template (replaces the products/totals block):
             <strong>{{ 'TOTAL'|t('container-deposits') }}</strong>
         </th>
         <td align="right" style="border-top: 1px solid #000; padding-top: 4px;">
-            <strong>{{ (productSubtotal + depositTotal)|commerceCurrency(order.currency) }}</strong>
+            <strong>{{ order.totalPrice|commerceCurrency(order.currency) }}</strong>
         </td>
     </tr>
-    {% if deposits|length %}
+    {% if deposits|length and not extras|length %}
         <tr>
             <th scope="row" colspan="2" align="left" style="font-size: x-small; color: #666; font-weight: normal;">
                 ({{ 'Total NET + Deposit'|t('container-deposits') }})
             </th>
         </tr>
+    {% endif %}
+    {% if deposits|length %}
         <tr>
             <td colspan="2" style="padding-top: 8px;">
                 {% include 'store/_partials/deposits-mandatory-notice' only %}

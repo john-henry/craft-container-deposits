@@ -8,7 +8,7 @@
 ] %}
 
 {% block actionButton %}
-    <a href="{{ url('container-deposits/new') }}" class="btn submit add icon">
+    <a id="container-deposits-new-btn" href="{{ url('container-deposits/new') }}" class="btn submit add icon">
         {{ "New Deposit Type"|t('container-deposits') }}
     </a>
 {% endblock %}
@@ -32,7 +32,7 @@
                                 <a href="{{ url('container-deposits/' ~ type.id) }}" class="go">{{ type.name }}</a>
                             </td>
                             <td class="code">{{ type.handle }}</td>
-                            <td>{{ type.amount|currency }}</td>
+                            <td>{{ type.amount|currency(craft.commerce.paymentCurrencies.primaryPaymentCurrency.iso) }}</td>
                             <td class="thin">
                                 <button type="button" class="delete icon"
                                    title="{{ 'Delete'|t('app') }}"
@@ -53,16 +53,34 @@
 
 {% js %}
     (function() {
-        document.querySelectorAll('[data-action="container-deposits/deposit-types/delete"]').forEach(function(button) {
+        var DELETE_SELECTOR = '[data-action="container-deposits/deposit-types/delete"]';
+        var newBtn = document.getElementById('container-deposits-new-btn');
+
+        document.querySelectorAll(DELETE_SELECTOR).forEach(function(button) {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 if (!confirm(button.dataset.confirm)) return;
+
+                var row = button.closest('tr');
+                var nextRow = row ? row.nextElementSibling : null;
+                var prevRow = row ? row.previousElementSibling : null;
+
                 Craft.sendActionRequest('POST', 'container-deposits/deposit-types/delete', {
                     data: { id: button.dataset.id }
                 }).then(function(response) {
                     var data = response.data;
                     if (data.success) {
-                        button.closest('tr').remove();
+                        if (row) row.remove();
+
+                        // Keep keyboard focus in the table rather than
+                        // dropping it on the body: the next row's delete
+                        // button, else the previous row's, else the page's
+                        // own "New" action.
+                        var focusTarget = (nextRow && nextRow.querySelector(DELETE_SELECTOR))
+                            || (prevRow && prevRow.querySelector(DELETE_SELECTOR))
+                            || newBtn;
+                        if (focusTarget) focusTarget.focus();
+
                         Craft.cp.displayNotice(Craft.t('container-deposits', 'Deposit type deleted.'));
                     } else {
                         Craft.cp.displayError(data.error || Craft.t('app', 'An unknown error occurred.'));

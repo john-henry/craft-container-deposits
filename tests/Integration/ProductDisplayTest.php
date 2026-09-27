@@ -76,9 +76,9 @@ it('multiplies the deposit qty by the containers per unit (a tray of cans)', fun
     // 2 trays × 24 cans each = 48 deposits.
     $order->setLineItems([countedProductLineItem($type, 2, 24)]);
 
-    ContainerDeposits::getInstance()->depositCart->syncDepositLineItems($order);
+    ContainerDeposits::getInstance()->getDepositCart()->syncDepositLineItems($order);
 
-    $deposits = ContainerDeposits::getInstance()->depositCart->getDepositLineItems($order);
+    $deposits = ContainerDeposits::getInstance()->getDepositCart()->getDepositLineItems($order);
     expect($deposits)->toHaveCount(1);
     expect($deposits[0]->qty)->toBe(48);
 });
@@ -92,9 +92,9 @@ it('rolls several multipacks of the same tier into one deposit line', function (
         countedProductLineItem($type, 2, 6),   // two more six-packs
     ]);
 
-    ContainerDeposits::getInstance()->depositCart->syncDepositLineItems($order);
+    ContainerDeposits::getInstance()->getDepositCart()->syncDepositLineItems($order);
 
-    $deposits = ContainerDeposits::getInstance()->depositCart->getDepositLineItems($order);
+    $deposits = ContainerDeposits::getInstance()->getDepositCart()->getDepositLineItems($order);
     expect($deposits)->toHaveCount(1);
     expect($deposits[0]->qty)->toBe(18); // (1 + 2) × 6
 });

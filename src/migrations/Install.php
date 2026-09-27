@@ -6,10 +6,11 @@
 
 namespace johnhenry\containerdeposits\migrations;
 
-use Craft;
 use craft\commerce\models\TaxCategory;
 use craft\commerce\Plugin as Commerce;
 use craft\db\Migration;
+use johnhenry\containerdeposits\elements\DepositPurchasable;
+use Throwable;
 
 /**
  * Install migration.
@@ -18,12 +19,12 @@ use craft\db\Migration;
  * foreign keys, and ensures the dedicated "Container Deposits (No VAT)" tax
  * category exists.
  *
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  */
 class Install extends Migration
 {
-    // Constants
+    // Const Properties
     // =========================================================================
 
     /**
@@ -38,8 +39,8 @@ class Install extends Migration
      * Creates the plugin's tables and tax category.
      *
      * @return bool Whether the migration applied successfully.
-     * @throws \Throwable if the tax category can't be saved.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @throws Throwable if the tax category can't be saved.
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function safeUp(): bool
@@ -47,7 +48,7 @@ class Install extends Migration
         if ($this->createTables()) {
             $this->createIndexes();
             $this->addForeignKeys();
-            Craft::$app->db->schema->refresh();
+            $this->db->getSchema()->refresh();
         }
 
         $this->ensureTaxCategory();
@@ -56,14 +57,28 @@ class Install extends Migration
     }
 
     /**
-     * Drops the plugin's tables.
+     * Removes the deposit purchasables, the no-VAT tax category and the
+     * plugin's tables.
+     *
+     * The purchasables go first, straight from the elements table: their
+     * Commerce purchasable, store and catalog price rows cascade with them, so
+     * nothing is left for a cart to point at once the plugin's gone.
      *
      * @return bool Whether the migration reverted successfully.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @throws Throwable if the tax category can't be deleted.
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function safeDown(): bool
     {
+        $this->delete('{{%elements}}', ['type' => DepositPurchasable::class]);
+
+        $taxCategories = Commerce::getInstance()?->getTaxCategories();
+        $taxCategory = $taxCategories?->getTaxCategoryByHandle(self::TAX_CATEGORY_HANDLE);
+        if ($taxCategory?->id !== null && !$taxCategory->default) {
+            $taxCategories->deleteTaxCategoryById($taxCategory->id);
+        }
+
         $this->dropTableIfExists('{{%containerdeposits_purchasables}}');
         $this->dropTableIfExists('{{%containerdeposits_types}}');
         return true;
@@ -77,8 +92,8 @@ class Install extends Migration
      * Irish Revenue treats DRS deposits as outside the scope of VAT.
      *
      * @return void
-     * @throws \Throwable if the tax category can't be saved.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @throws Throwable if the tax category can't be saved.
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     protected function ensureTaxCategory(): void
@@ -105,13 +120,19 @@ class Install extends Migration
     /**
      * Creates the plugin's database tables if they don't already exist.
      *
-     * @return bool Whether the tables were created (or already existed).
-     * @author JohnHenry <info@johnhenry.ie>
+     * Returns false when both tables were already there, so a reinstall over
+     * surviving tables doesn't add their indexes and foreign keys twice.
+     *
+     * @return bool Whether any table was created.
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     protected function createTables(): bool
     {
+        $created = false;
+
         if (!$this->db->tableExists('{{%containerdeposits_types}}')) {
+            $created = true;
             $this->createTable('{{%containerdeposits_types}}', [
                 'id' => $this->primaryKey(),
                 'name' => $this->string()->notNull(),
@@ -126,6 +147,7 @@ class Install extends Migration
         }
 
         if (!$this->db->tableExists('{{%containerdeposits_purchasables}}')) {
+            $created = true;
             $this->createTable('{{%containerdeposits_purchasables}}', [
                 'id' => $this->integer()->notNull(),
                 'depositTypeId' => $this->integer()->notNull(),
@@ -133,14 +155,14 @@ class Install extends Migration
             ]);
         }
 
-        return true;
+        return $created;
     }
 
     /**
      * Creates the plugin's table indexes.
      *
      * @return void
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     protected function createIndexes(): void
@@ -154,7 +176,7 @@ class Install extends Migration
      * Creates the plugin's foreign keys.
      *
      * @return void
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     protected function addForeignKeys(): void

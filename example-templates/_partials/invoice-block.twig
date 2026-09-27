@@ -40,7 +40,7 @@ OR (anywhere a `cart` is in scope):
                 <td>{{ item.description }}</td>
                 <td align="right">{{ item.qty }}</td>
                 <td align="right">{{ item.price|commerceCurrency(order.currency) }}</td>
-                <td align="right">{{ (item.price * item.qty)|commerceCurrency(order.currency) }}</td>
+                <td align="right">{{ item.subtotal|commerceCurrency(order.currency) }}</td>
             </tr>
         {% endfor %}
         </tbody>

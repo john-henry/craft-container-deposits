@@ -20,7 +20,7 @@ use craft\db\ActiveRecord;
  * @property float $amount The deposit amount in the store currency.
  * @property int|null $purchasableId The backing purchasable element ID.
  * @property int|null $sortOrder The deposit type's sort order.
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  */
 class DepositTypeRecord extends ActiveRecord
@@ -32,7 +32,7 @@ class DepositTypeRecord extends ActiveRecord
      * Returns the name of the database table this record uses.
      *
      * @return string The table name.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public static function tableName(): string

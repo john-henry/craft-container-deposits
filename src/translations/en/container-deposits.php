@@ -17,7 +17,9 @@ return [
     'Amount' => 'Amount',
     'Deposit' => 'Deposit',
     'Deposits' => 'Deposits',
-    '— None —' => '— None —',
+    'None' => 'None',
+    'Enter the deposit amount as a number, e.g. 0.15.' => 'Enter the deposit amount as a number, e.g. 0.15.',
+    'This deposit type is still assigned to {count, plural, =1{# product or variant} other{# products and variants}}. Remove it from them first.' => 'This deposit type is still assigned to {count, plural, =1{# product or variant} other{# products and variants}}. Remove it from them first.',
 
     // Edit screen field instructions
     'The label shown on the deposit line item in cart (e.g. "Can Deposit", "Container Deposits").' => 'The label shown on the deposit line item in cart (e.g. "Can Deposit", "Container Deposits").',

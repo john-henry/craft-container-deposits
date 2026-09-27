@@ -26,7 +26,7 @@ use yii\base\InvalidConfigException;
  *   {% set deposits = craft.containerDeposits.lineItemsFor(order) %}
  *   {% set depositTotal = craft.containerDeposits.totalFor(order) %}
  *
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  */
 class ContainerDepositsVariable
@@ -39,12 +39,12 @@ class ContainerDepositsVariable
      *
      * @param Order $order The order to read line items from.
      * @return LineItem[] The deposit line items.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function lineItemsFor(Order $order): array
     {
-        return ContainerDeposits::getInstance()->depositCart->getDepositLineItems($order);
+        return ContainerDeposits::getInstance()->getDepositCart()->getDepositLineItems($order);
     }
 
     /**
@@ -52,12 +52,12 @@ class ContainerDepositsVariable
      *
      * @param Order $order The order to read line items from.
      * @return LineItem[] The product line items.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function productLineItemsFor(Order $order): array
     {
-        return ContainerDeposits::getInstance()->depositCart->getProductLineItems($order);
+        return ContainerDeposits::getInstance()->getDepositCart()->getProductLineItems($order);
     }
 
     /**
@@ -65,12 +65,12 @@ class ContainerDepositsVariable
      *
      * @param Order $order The order to total.
      * @return float The total deposit amount.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function totalFor(Order $order): float
     {
-        return ContainerDeposits::getInstance()->depositCart->getDepositTotal($order);
+        return ContainerDeposits::getInstance()->getDepositCart()->getDepositTotal($order);
     }
 
     /**
@@ -78,12 +78,12 @@ class ContainerDepositsVariable
      *
      * @param Order $order The order to total.
      * @return float The product subtotal.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function productSubtotalFor(Order $order): float
     {
-        return ContainerDeposits::getInstance()->depositCart->getProductSubtotal($order);
+        return ContainerDeposits::getInstance()->getDepositCart()->getProductSubtotal($order);
     }
 
     /**
@@ -93,12 +93,12 @@ class ContainerDepositsVariable
      *
      * @param Order $order The order to read line items from.
      * @return LineItem[] The ordered line items.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function sortedLineItemsFor(Order $order): array
     {
-        $service = ContainerDeposits::getInstance()->depositCart;
+        $service = ContainerDeposits::getInstance()->getDepositCart();
         return array_merge(
             $service->getProductLineItems($order),
             $service->getDepositLineItems($order),
@@ -112,13 +112,13 @@ class ContainerDepositsVariable
      *
      * @param Order $order The order to total.
      * @return int The total product quantity.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function productQtyFor(Order $order): int
     {
         $qty = 0;
-        foreach (ContainerDeposits::getInstance()->depositCart->getProductLineItems($order) as $item) {
+        foreach (ContainerDeposits::getInstance()->getDepositCart()->getProductLineItems($order) as $item) {
             $qty += $item->qty;
         }
         return $qty;
@@ -129,24 +129,24 @@ class ContainerDepositsVariable
      *
      * @param LineItem $lineItem The line item to test.
      * @return bool Whether the line item is a deposit.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function isDeposit(LineItem $lineItem): bool
     {
-        return !empty($lineItem->options['_deposit']);
+        return ContainerDeposits::getInstance()->getDepositCart()->isDepositLineItem($lineItem);
     }
 
     /**
      * Returns every deposit type configured in the CP.
      *
      * @return DepositType[] The configured deposit types.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function allTypes(): array
     {
-        return ContainerDeposits::getInstance()->depositTypes->getAllDepositTypes();
+        return ContainerDeposits::getInstance()->getDepositTypes()->getAllDepositTypes();
     }
 
     /**
@@ -157,11 +157,11 @@ class ContainerDepositsVariable
      * @return DepositType|null The assigned deposit type, or null.
      * @throws InvalidFieldException
      * @since 1.0.0
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      */
     public function typeFor(ElementInterface $purchasable): ?DepositType
     {
-        return ContainerDeposits::getInstance()->depositCart->getDepositTypeForPurchasable($purchasable);
+        return ContainerDeposits::getInstance()->getDepositCart()->getDepositTypeForPurchasable($purchasable);
     }
 
     /**
@@ -172,11 +172,11 @@ class ContainerDepositsVariable
      * @return int The container count per unit.
      * @throws InvalidFieldException
      * @since 1.0.0
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      */
     public function containersFor(ElementInterface $purchasable): int
     {
-        return ContainerDeposits::getInstance()->depositCart->getContainerCountForPurchasable($purchasable);
+        return ContainerDeposits::getInstance()->getDepositCart()->getContainerCountForPurchasable($purchasable);
     }
 
     /**
@@ -189,7 +189,7 @@ class ContainerDepositsVariable
      * @return float The deposit amount for one unit.
      * @throws InvalidFieldException
      * @since 1.0.0
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      */
     public function unitDepositFor(ElementInterface $purchasable): float
     {
@@ -213,7 +213,7 @@ class ContainerDepositsVariable
      * @return string The formatted deposit display string.
      * @throws InvalidFieldException
      * @since 1.0.0
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      */
     public function displayFor(ElementInterface $purchasable): string
     {
@@ -228,29 +228,65 @@ class ContainerDepositsVariable
     }
 
     /**
-     * Render an amount in Re-turn's preferred style: cents for sub-€1,
-     * currency for €1+.
+     * Renders an amount the way a deposit is usually written: in cents below
+     * 1 for currencies that are commonly written that way ("15c", or "15p"
+     * for sterling), and in the currency format otherwise.
      *
      * @param float $amount The amount to format.
-     * @param string|null $currency The currency code, or null to use the store currency.
+     * @param string|null $currency The currency code, or null to use the current store's.
      * @return string The formatted amount.
      * @throws InvalidConfigException
      * @throws SiteNotFoundException
      * @since 1.0.0
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      */
     public function formatAmount(float $amount, ?string $currency = null): string
     {
-        if ($amount < 1) {
-            // 0.15 → "15c", 0.90 → "90c"
-            return round($amount * 100) . 'c';
-        }
+        $currency ??= $this->_currentCurrency();
+        $suffix = $this->minorUnitSuffix($currency);
 
-        if ($currency === null) {
-            $store = Commerce::getInstance()->getStores()->getCurrentStore();
-            $currency = $store->getCurrency()?->getCode() ?? 'EUR';
+        if ($suffix !== null && $amount < 1) {
+            return round($amount * 100) . $suffix;
         }
 
         return Craft::$app->getFormatter()->asCurrency($amount, $currency);
+    }
+
+    /**
+     * Returns the suffix used for amounts under 1 in the given currency ("c"
+     * for euro, "p" for sterling), or null where amounts are always written in
+     * the currency format.
+     *
+     * @param string|null $currency The currency code, or null to use the current store's.
+     * @return string|null The suffix, or null.
+     * @throws InvalidConfigException
+     * @throws SiteNotFoundException
+     * @since 1.1.0
+     * @author John Henry Donovan <info@johnhenry.ie>
+     */
+    public function minorUnitSuffix(?string $currency = null): ?string
+    {
+        return match (strtoupper($currency ?? $this->_currentCurrency())) {
+            'EUR', 'USD', 'AUD', 'NZD', 'CAD' => 'c',
+            'GBP' => 'p',
+            default => null,
+        };
+    }
+
+    // Private Methods
+    // =========================================================================
+
+    /**
+     * Returns the current store's currency code.
+     *
+     * @return string The currency code.
+     * @throws InvalidConfigException
+     * @throws SiteNotFoundException
+     * @since 1.1.0
+     * @author John Henry Donovan <info@johnhenry.ie>
+     */
+    private function _currentCurrency(): string
+    {
+        return Commerce::getInstance()->getStores()->getCurrentStore()->getCurrency()?->getCode() ?? 'EUR';
     }
 }
