@@ -20,11 +20,11 @@ it('updates the deposit type and reuses the existing purchasable', function () {
     $originalPurchasableId = $type->purchasableId;
 
     $type->amount = 0.20;
-    ContainerDeposits::getInstance()->depositTypes->saveDepositType($type);
+    ContainerDeposits::getInstance()->getDepositTypes()->saveDepositType($type);
 
     expect($type->purchasableId)->toBe($originalPurchasableId);
 
-    $reloaded = ContainerDeposits::getInstance()->depositTypes->getDepositTypeById($type->id);
+    $reloaded = ContainerDeposits::getInstance()->getDepositTypes()->getDepositTypeById($type->id);
     expect($reloaded->amount)->toEqual(0.20);
 });
 
@@ -63,7 +63,7 @@ it('uses the containerDeposit tax category', function () {
 it('finds deposit types by handle', function () {
     makeDepositType('Container Deposits', 'containerDeposit', 0.25);
 
-    $found = ContainerDeposits::getInstance()->depositTypes->getDepositTypeByHandle('containerDeposit');
+    $found = ContainerDeposits::getInstance()->getDepositTypes()->getDepositTypeByHandle('containerDeposit');
     expect($found)->toBeInstanceOf(DepositType::class);
     expect($found->amount)->toEqual(0.25);
 });
@@ -72,9 +72,9 @@ it('deletes the deposit type and its purchasable element', function () {
     $type = makeDepositType();
     $purchasableId = $type->purchasableId;
 
-    ContainerDeposits::getInstance()->depositTypes->deleteDepositTypeById($type->id);
+    ContainerDeposits::getInstance()->getDepositTypes()->deleteDepositTypeById($type->id);
 
-    expect(ContainerDeposits::getInstance()->depositTypes->getDepositTypeById($type->id))->toBeNull();
+    expect(ContainerDeposits::getInstance()->getDepositTypes()->getDepositTypeById($type->id))->toBeNull();
     expect(Craft::$app->getElements()->getElementById($purchasableId))->toBeNull();
 });
 
@@ -91,20 +91,22 @@ it('reports a deposit purchasable unavailable only when its deposit type is gone
     /** @var DepositPurchasable $purchasable */
     $purchasable = Craft::$app->getElements()->getElementById($type->purchasableId, DepositPurchasable::class);
 
-    ContainerDeposits::getInstance()->depositTypes->deleteDepositTypeById($type->id);
+    expect($purchasable->getIsAvailable())->toBeTrue();
 
-    // Re-fetch a fresh instance so nothing is memoized from before the delete.
-    /** @var DepositPurchasable|null $reloaded */
-    $reloaded = Craft::$app->getElements()->getElementById($purchasable->id, DepositPurchasable::class);
+    ContainerDeposits::getInstance()->getDepositTypes()->deleteDepositTypeById($type->id);
 
-    expect($reloaded === null || $reloaded->getIsAvailable() === false)->toBeTrue();
+    // A fresh instance pointing at the deleted type, with nothing memoized
+    $orphan = new DepositPurchasable(['depositTypeId' => $type->id]);
+
+    expect(Craft::$app->getElements()->getElementById($purchasable->id, DepositPurchasable::class))->toBeNull();
+    expect($orphan->getIsAvailable())->toBeFalse();
 });
 
 it('rejects a duplicate handle with a validation error instead of throwing', function () {
     makeDepositType('Can Deposit', 'dupHandle', 0.15);
 
     $duplicate = new DepositType(['name' => 'Another Deposit', 'handle' => 'dupHandle', 'amount' => 0.25]);
-    $saved = ContainerDeposits::getInstance()->depositTypes->saveDepositType($duplicate);
+    $saved = ContainerDeposits::getInstance()->getDepositTypes()->saveDepositType($duplicate);
 
     expect($saved)->toBeFalse();
     expect($duplicate->getErrors('handle'))->not->toBeEmpty();
@@ -146,39 +148,31 @@ it('allows re-saving the same deposit type without tripping its own uniqueness c
     $type = makeDepositType('Can Deposit', 'selfSaveHandle', 0.15);
 
     $type->amount = 0.30;
-    $saved = ContainerDeposits::getInstance()->depositTypes->saveDepositType($type);
+    $saved = ContainerDeposits::getInstance()->getDepositTypes()->saveDepositType($type);
 
     expect($saved)->toBeTrue();
     expect($type->getErrors('handle'))->toBeEmpty();
 });
 
-it('propagates the deposit purchasable to every enabled site', function () {
+it('finds the deposit purchasable from every site, so a cart on any site can add it', function () {
     $type = makeDepositType();
-    /** @var DepositPurchasable $purchasable */
-    $purchasable = Craft::$app->getElements()->getElementById($type->purchasableId, DepositPurchasable::class);
 
-    $supported = $purchasable->getSupportedSites();
-
-    // getSupportedSites() only includes enabled sites; every configured site in
-    // the test environment is enabled, so the counts should match.
-    $enabledSiteIds = [];
-    foreach (Craft::$app->getSites()->getAllSites() as $site) {
-        if ($site->getEnabled()) {
-            $enabledSiteIds[] = $site->id;
-        }
+    foreach (Craft::$app->getSites()->getAllSites(true) as $site) {
+        $purchasable = Craft::$app->getElements()->getElementById($type->purchasableId, DepositPurchasable::class, $site->id);
+        expect($purchasable)->toBeInstanceOf(DepositPurchasable::class);
     }
+});
 
-    expect($supported)->toHaveCount(count($enabledSiteIds));
+it('accepts camelCase handles', function () {
+    $type = new DepositType(['name' => 'Bottle Deposit', 'handle' => 'bottleDepositCamelCase', 'amount' => 0.15]);
 
-    $supportedSiteIds = array_column($supported, 'siteId');
-    sort($supportedSiteIds);
-    sort($enabledSiteIds);
-    expect($supportedSiteIds)->toBe($enabledSiteIds);
+    expect($type->validate(['handle']))->toBeTrue();
+});
 
-    // Every supported site is configured to propagate and be enabled by default
-    foreach ($supported as $entry) {
-        expect($entry)->toHaveKeys(['siteId', 'propagate', 'enabledByDefault']);
-        expect($entry['propagate'])->toBeTrue();
-        expect($entry['enabledByDefault'])->toBeTrue();
-    }
+it('accepts the Re-turn standard tiers', function () {
+    $small = new DepositType(['name' => 'Small Container', 'handle' => 'smallContainerTier', 'amount' => 0.15]);
+    $large = new DepositType(['name' => 'Large Container', 'handle' => 'largeContainerTier', 'amount' => 0.25]);
+
+    expect($small->validate())->toBeTrue();
+    expect($large->validate())->toBeTrue();
 });

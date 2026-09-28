@@ -21,7 +21,7 @@ use Throwable;
  * `Sites::EVENT_AFTER_SAVE_SITE` handler so the resave loop runs on the queue
  * and doesn't hold up saving the site.
  *
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  */
 class ResaveDepositPurchasables extends BaseJob
@@ -35,12 +35,12 @@ class ResaveDepositPurchasables extends BaseJob
      * @param \craft\queue\QueueInterface|\yii\queue\Queue $queue The queue the job belongs to.
      * @return void
      * @throws Throwable if a purchasable can't be saved.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function execute($queue): void
     {
-        $depositTypes = ContainerDeposits::getInstance()->depositTypes->getAllDepositTypes();
+        $depositTypes = ContainerDeposits::getInstance()->getDepositTypes()->getAllDepositTypes();
         $total = count($depositTypes);
 
         if ($total === 0) {
@@ -79,7 +79,7 @@ class ResaveDepositPurchasables extends BaseJob
      * @inheritdoc
      *
      * @return string|null The default job description.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     protected function defaultDescription(): ?string

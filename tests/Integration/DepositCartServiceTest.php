@@ -24,7 +24,7 @@ function buildDepositLineItem(int $depositTypeId, int $purchasableId, int $qty, 
  * A stand-in "product" purchasable that reports a fixed DepositType from its
  * (fake) field layout, without needing a real Commerce product/field layout
  * round-trip. Used to exercise DepositCartService::_doSync()'s regular-item
- * resolution path (_getDepositTypeForLineItem / getDepositTypeForPurchasable).
+ * resolution path (_getDepositTypeCached / getDepositTypeForPurchasable).
  */
 class FakeProductPurchasable extends DepositPurchasable
 {
@@ -74,7 +74,7 @@ it('removes orphaned deposit line items when no parent items have deposits', fun
     $orphan = buildDepositLineItem($type->id, $type->purchasableId, 5, 0.15);
     $order->setLineItems([$orphan]);
 
-    ContainerDeposits::getInstance()->depositCart->syncDepositLineItems($order);
+    ContainerDeposits::getInstance()->getDepositCart()->syncDepositLineItems($order);
 
     expect($order->getLineItems())->toHaveCount(0);
 });
@@ -86,12 +86,12 @@ it('creates and syncs a zero-amount deposit line item rather than stripping it',
     $product = buildProductLineItemWithDeposit($type, 3, 12.00);
     $order->setLineItems([$product]);
 
-    ContainerDeposits::getInstance()->depositCart->syncDepositLineItems($order);
+    ContainerDeposits::getInstance()->getDepositCart()->syncDepositLineItems($order);
 
     $items = $order->getLineItems();
     expect($items)->toHaveCount(2);
 
-    $deposits = ContainerDeposits::getInstance()->depositCart->getDepositLineItems($order);
+    $deposits = ContainerDeposits::getInstance()->getDepositCart()->getDepositLineItems($order);
     expect($deposits)->toHaveCount(1);
     expect($deposits[0]->qty)->toBe(3);
     expect($deposits[0]->options['_depositTypeId'] ?? null)->toBe($type->id);
@@ -111,9 +111,9 @@ it('detects a deposit quantity change when the product line item count stays the
     $product->qty = 5;
     $order->setLineItems([$product, $existingDeposit]);
 
-    ContainerDeposits::getInstance()->depositCart->syncDepositLineItems($order);
+    ContainerDeposits::getInstance()->getDepositCart()->syncDepositLineItems($order);
 
-    $deposits = ContainerDeposits::getInstance()->depositCart->getDepositLineItems($order);
+    $deposits = ContainerDeposits::getInstance()->getDepositCart()->getDepositLineItems($order);
     expect($deposits)->toHaveCount(1);
     expect($deposits[0]->qty)->toBe(5);
 });
@@ -126,7 +126,7 @@ it('skips completed orders entirely', function () {
     $orphan = buildDepositLineItem($type->id, $type->purchasableId, 99, 0.15);
     $order->setLineItems([$orphan]);
 
-    ContainerDeposits::getInstance()->depositCart->syncDepositLineItems($order);
+    ContainerDeposits::getInstance()->getDepositCart()->syncDepositLineItems($order);
 
     // Completed orders are untouched: the orphan deposit remains.
     expect($order->getLineItems())->toHaveCount(1);

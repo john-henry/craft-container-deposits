@@ -12,16 +12,16 @@ Tests use [Pest](https://pestphp.com/) on top of [`markhuot/craft-pest-core`](ht
 From the parent Craft project (not from inside the plugin folder):
 
 ```bash
-ddev exec vendor/bin/pest plugins/craft-container-deposits/tests \
-  --test-directory=plugins/craft-container-deposits/tests
+ddev exec composer test:cd
 ```
 
-To run a single suite:
+To run part of it, pass Pest's `--filter` through:
 
 ```bash
-ddev exec vendor/bin/pest plugins/craft-container-deposits/tests/Feature
-ddev exec vendor/bin/pest plugins/craft-container-deposits/tests/Integration
+ddev exec composer test:cd -- --filter=DepositCartService
 ```
+
+Always go through `composer test:cd`, which passes `--test-directory`. Without that flag Pest skips `Pest.php`, so `RefreshesDatabase` never runs and the tests write to your development database.
 
 ## Adding tests
 

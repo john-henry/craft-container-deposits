@@ -18,12 +18,12 @@ use johnhenry\containerdeposits\records\DepositTypeRecord;
  * {@see \johnhenry\containerdeposits\elements\DepositPurchasable} so it can be
  * added to a cart as a line item.
  *
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  */
 class DepositType extends Model
 {
-    // Properties
+    // Public Properties
     // =========================================================================
 
     /**
@@ -68,7 +68,7 @@ class DepositType extends Model
      * @inheritdoc
      *
      * @return array The validation rules.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function defineRules(): array
@@ -89,7 +89,7 @@ class DepositType extends Model
      *
      * @param string $attribute The attribute being validated (always "handle").
      * @return void
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function validateHandleUniqueness(string $attribute): void

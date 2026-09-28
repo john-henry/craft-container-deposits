@@ -1,17 +1,21 @@
 {
   "name": "johnhenry/craft-container-deposits",
-  "description": "Container deposits for Craft Commerce - built for any deposit return scheme, Re-turn (Ireland) ready out of the box",
+  "description": "Container deposits for Craft Commerce, each on its own cart line and kept out of VAT and discounts. Set up for Ireland's Re-turn scheme.",
   "type": "craft-plugin",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "keywords": [
-    "craft",
-    "cms",
-    "craftcms",
     "craft-commerce",
-    "craft-plugin",
-    "deposit",
+    "container deposits",
+    "deposit return scheme",
     "drs",
-    "container-deposits"
+    "re-turn",
+    "bottle deposit",
+    "can deposit",
+    "drinks",
+    "multipacks",
+    "vat exempt",
+    "receipts",
+    "ireland"
   ],
   "license": "proprietary",
   "authors": [
@@ -28,7 +32,8 @@
   },
   "require-dev": {
     "craftcms/ecs": "dev-main",
-    "craftcms/phpstan": "dev-main"
+    "craftcms/phpstan": "dev-main",
+    "phpstan/phpstan": "^2.2"
   },
   "minimum-stability": "stable",
   "prefer-stable": true,

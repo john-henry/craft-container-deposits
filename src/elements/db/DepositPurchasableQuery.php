@@ -16,12 +16,12 @@ use yii\base\NotSupportedException;
  * Adds a `depositTypeId` query param so deposit purchasables can be filtered by
  * the deposit type they back.
  *
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  */
 class DepositPurchasableQuery extends PurchasableQuery
 {
-    // Properties
+    // Public Properties
     // =========================================================================
 
     /**
@@ -38,7 +38,7 @@ class DepositPurchasableQuery extends PurchasableQuery
      *
      * @param int $depositTypeId The deposit type ID.
      * @return static self reference.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function depositTypeId(int $depositTypeId): static
@@ -55,7 +55,7 @@ class DepositPurchasableQuery extends PurchasableQuery
      *
      * @return bool Whether the query should be prepared and executed.
      * @throws NotSupportedException
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     protected function beforePrepare(): bool

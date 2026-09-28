@@ -8,7 +8,10 @@ namespace johnhenry\containerdeposits\services;
 
 use Craft;
 use craft\base\Component;
+use craft\commerce\elements\Product;
+use craft\commerce\elements\Variant;
 use johnhenry\containerdeposits\elements\DepositPurchasable;
+use johnhenry\containerdeposits\fields\DepositTypeField;
 use johnhenry\containerdeposits\models\DepositType;
 use johnhenry\containerdeposits\records\DepositTypeRecord;
 use Throwable;
@@ -21,7 +24,7 @@ use Throwable;
  * for the duration of the request and reset whenever the underlying data
  * changes.
  *
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  *
  * @property-read DepositType[] $allDepositTypes
@@ -43,7 +46,7 @@ class DepositTypeService extends Component
      * Returns every configured deposit type, ordered by sort order then name.
      *
      * @return DepositType[] The configured deposit types.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function getAllDepositTypes(): array
@@ -68,7 +71,7 @@ class DepositTypeService extends Component
      *
      * @param int $id The deposit type ID.
      * @return DepositType|null The deposit type, or null.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function getDepositTypeById(int $id): ?DepositType
@@ -86,7 +89,7 @@ class DepositTypeService extends Component
      *
      * @param string $handle The deposit type handle.
      * @return DepositType|null The deposit type, or null.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function getDepositTypeByHandle(string $handle): ?DepositType
@@ -110,7 +113,7 @@ class DepositTypeService extends Component
      * @param DepositType $model The deposit type to save.
      * @return bool Whether the deposit type was saved successfully.
      * @throws Throwable if the transaction can't be rolled back.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function saveDepositType(DepositType $model): bool
@@ -166,18 +169,45 @@ class DepositTypeService extends Component
     }
 
     /**
+     * Returns how many products and variants have the deposit type assigned,
+     * across every site and status. Drafts and revisions aren't counted.
+     *
+     * @param int $id The deposit type ID.
+     * @return int The number of products and variants using it.
+     * @author John Henry Donovan <info@johnhenry.ie>
+     * @since 1.1.0
+     */
+    public function getUsageCount(int $id): int
+    {
+        $count = 0;
+
+        foreach (Craft::$app->getFields()->getFieldsByType(DepositTypeField::class) as $field) {
+            foreach ([Variant::class, Product::class] as $elementType) {
+                $query = $elementType::find()->status(null)->site('*')->unique();
+                $query->{$field->handle} = $id;
+                $count += (int)$query->count();
+            }
+        }
+
+        return $count;
+    }
+
+    /**
      * Deletes the deposit type with the given ID and its backing purchasable.
+     *
+     * A deposit type that's still assigned to a product or variant isn't
+     * deleted: those products would quietly stop charging a deposit.
      *
      * @param int $id The deposit type ID.
      * @return bool Whether a deposit type was deleted.
      * @throws Throwable if the backing element can't be deleted.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function deleteDepositTypeById(int $id): bool
     {
         $record = DepositTypeRecord::findOne($id);
-        if (!$record) {
+        if (!$record || $this->getUsageCount($id) > 0) {
             return false;
         }
 
@@ -205,7 +235,7 @@ class DepositTypeService extends Component
      * @param DepositType $depositType The deposit type to sync.
      * @return bool Whether the purchasable was synced successfully.
      * @throws Throwable if the backing element can't be saved.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     protected function _syncPurchasable(DepositType $depositType): bool
@@ -249,7 +279,7 @@ class DepositTypeService extends Component
      *
      * @param DepositTypeRecord $record The deposit type record.
      * @return DepositType The populated deposit type model.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     private function _createDepositTypeFromRecord(DepositTypeRecord $record): DepositType

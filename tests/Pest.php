@@ -7,10 +7,8 @@
  * touches Craft::$app or Craft::t() must live under Integration/ and use the
  * RefreshesDatabase trait so the test DB is rolled back after each test.
  *
- * Run from the parent Craft project:
- *
- *   vendor/bin/pest plugins/craft-container-deposits/tests \
- *     --test-directory=plugins/craft-container-deposits/tests
+ * Run from the parent Craft project with `ddev exec composer test:cd`, which
+ * passes the --test-directory flag this file needs to be loaded at all.
  */
 
 use craft\commerce\elements\Order;
@@ -30,7 +28,7 @@ uses(
 // service re-reads from the DB after RefreshesDatabase rolls back the previous
 // test's transaction.
 beforeEach(function () {
-    $service = ContainerDeposits::getInstance()->depositTypes;
+    $service = ContainerDeposits::getInstance()->getDepositTypes();
     $prop = new \ReflectionProperty($service, '_allDepositTypes');
     $prop->setAccessible(true);
     $prop->setValue($service, null);
@@ -55,7 +53,7 @@ function makeDepositType(string $name = 'Can Deposit', string $handle = 'canDepo
     DepositTypeRecord::deleteAll(['handle' => $handle]);
 
     // Reset the service cache so it re-reads after the delete.
-    $service = ContainerDeposits::getInstance()->depositTypes;
+    $service = ContainerDeposits::getInstance()->getDepositTypes();
     $prop = new \ReflectionProperty($service, '_allDepositTypes');
     $prop->setAccessible(true);
     $prop->setValue($service, null);

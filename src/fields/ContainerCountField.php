@@ -21,14 +21,14 @@ use craft\fields\Number;
  * If the field isn't on the layout, or is left empty, the count falls back to
  * 1 and the product just gets a single deposit per unit.
  *
- * @author JohnHenry <info@johnhenry.ie>
+ * @author John Henry Donovan <info@johnhenry.ie>
  * @since 1.0.0
  *
  * @property-read array[] $elementValidationRules
  */
 class ContainerCountField extends Number
 {
-    // Properties
+    // Public Properties
     // =========================================================================
 
     /**
@@ -36,14 +36,14 @@ class ContainerCountField extends Number
      */
     public int $defaultContainerCount = 1;
 
-    // Static Methods
+    // Public Methods
     // =========================================================================
 
     /**
      * @inheritdoc
      *
      * @return string The display name.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public static function displayName(): string
@@ -51,14 +51,11 @@ class ContainerCountField extends Number
         return Craft::t('container-deposits', 'Containers Per Unit (Deposit)');
     }
 
-    // Public Methods
-    // =========================================================================
-
     /**
      * @inheritdoc
      *
      * @param array $config The field configuration.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function __construct($config = [])
@@ -75,7 +72,7 @@ class ContainerCountField extends Number
      * @inheritdoc
      *
      * @return array The element validation rules.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function getElementValidationRules(): array
@@ -91,7 +88,7 @@ class ContainerCountField extends Number
      * @param mixed $value The raw field value.
      * @param ElementInterface|null $element The element the field is on.
      * @return mixed The normalized container count.
-     * @author JohnHenry <info@johnhenry.ie>
+     * @author John Henry Donovan <info@johnhenry.ie>
      * @since 1.0.0
      */
     public function normalizeValue(mixed $value, ?ElementInterface $element = null): mixed
