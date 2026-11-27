@@ -1,5 +1,16 @@
 # Release Notes for Container Deposits
 
+## 1.1.1 - 2026-11-27
+
+### Changed
+- Requires Commerce 5.1 or later.
+- The deposit types index is now titled "Deposit Types", and its item in the control panel nav is highlighted.
+- The instructions for a deposit type's name, handle and amount are clearer.
+- With no deposit types set up, the index now says what to add.
+
+### Fixed
+- An error is now shown when a deposit type can't be deleted because of a server or network problem.
+
 ## 1.1.0 - 2026-09-25
 
 ### Added

@@ -7,7 +7,9 @@ Container Deposits is a plugin for Craft CMS 5. This statement sets out how acce
 This statement covers Container Deposits 1.1.0:
 
 - the deposit types screens
-- the Deposit Type and Container Count fields
+- the Container Deposit Type and Containers Per Unit (Deposit) fields
+
+Version 1.1.1 changes the wording on the deposit types screens (the index title, the field instructions, the message shown when there are no deposit types, and an error when a delete fails). Those changes haven't been reviewed against this statement yet.
 
 It doesn't cover:
 

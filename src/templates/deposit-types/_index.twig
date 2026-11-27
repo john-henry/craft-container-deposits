@@ -1,6 +1,7 @@
 {% extends "_layouts/cp" %}
 
-{% set title = "Container Deposits"|t('container-deposits') %}
+{% set title = "Deposit Types"|t('container-deposits') %}
+{% set selectedSubnavItem = 'deposit-types' %}
 {% set fullPageForm = false %}
 
 {% set crumbs = [
@@ -14,6 +15,9 @@
 {% endblock %}
 
 {% block content %}
+    <p id="container-deposits-empty" class="zilch"{{ depositTypes|length ? ' hidden' }}>
+        {{ "No deposit types yet. Add one for each deposit amount your scheme charges."|t('container-deposits') }}
+    </p>
     {% if depositTypes|length %}
         <div class="tableview">
             <table class="data fullwidth collapsible" id="deposittypes">
@@ -46,8 +50,6 @@
                 </tbody>
             </table>
         </div>
-    {% else %}
-        <p>{{ "No deposit types yet."|t('container-deposits') }}</p>
     {% endif %}
 {% endblock %}
 
@@ -72,6 +74,12 @@
                     if (data.success) {
                         if (row) row.remove();
 
+                        var tableview = document.querySelector('#content .tableview');
+                        if (tableview && !tableview.querySelector('tbody tr')) {
+                            tableview.remove();
+                            document.getElementById('container-deposits-empty').hidden = false;
+                        }
+
                         // Keep keyboard focus in the table rather than
                         // dropping it on the body: the next row's delete
                         // button, else the previous row's, else the page's
@@ -85,6 +93,9 @@
                     } else {
                         Craft.cp.displayError(data.error || Craft.t('app', 'An unknown error occurred.'));
                     }
+                }).catch(function(error) {
+                    var data = error.response && error.response.data;
+                    Craft.cp.displayError((data && (data.error || data.message)) || Craft.t('app', 'An unknown error occurred.'));
                 });
             });
         });
