@@ -11,7 +11,7 @@ return [
     'Could not delete deposit type.' => 'Could not delete deposit type.',
     'Couldn\'t save deposit type.' => 'Couldn\'t save deposit type.',
     'Deposit type not found.' => 'Deposit type not found.',
-    'No deposit types yet.' => 'No deposit types yet.',
+    'No deposit types yet. Add one for each deposit amount your scheme charges.' => 'No deposit types yet. Add one for each deposit amount your scheme charges.',
     'Are you sure you want to delete "{name}"?' => 'Are you sure you want to delete "{name}"?',
     'Delete {name}' => 'Delete {name}',
     'Amount' => 'Amount',
@@ -22,9 +22,9 @@ return [
     'This deposit type is still assigned to {count, plural, =1{# product or variant} other{# products and variants}}. Remove it from them first.' => 'This deposit type is still assigned to {count, plural, =1{# product or variant} other{# products and variants}}. Remove it from them first.',
 
     // Edit screen field instructions
-    'The label shown on the deposit line item in cart (e.g. "Can Deposit", "Container Deposits").' => 'The label shown on the deposit line item in cart (e.g. "Can Deposit", "Container Deposits").',
-    'A unique identifier used internally (e.g. "canDeposit", "containerDeposit").' => 'A unique identifier used internally (e.g. "canDeposit", "containerDeposit").',
-    'The deposit amount in the store currency (e.g. 0.15 for €0.15).' => 'The deposit amount in the store currency (e.g. 0.15 for €0.15).',
+    'Shown on the deposit line in the cart and on receipts, such as "15c" or "Can Deposit".' => 'Shown on the deposit line in the cart and on receipts, such as "15c" or "Can Deposit".',
+    'Goes into the SKU on the deposit line, such as "deposit-smallContainer". Must be unique.' => 'Goes into the SKU on the deposit line, such as "deposit-smallContainer". Must be unique.',
+    'Charged for each container, in the store\'s currency. Enter 0.15 for a 15c deposit.' => 'Charged for each container, in the store\'s currency. Enter 0.15 for a 15c deposit.',
 
     // Field types
     'Containers Per Unit (Deposit)' => 'Containers Per Unit (Deposit)',

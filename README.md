@@ -5,19 +5,19 @@
 
 # Container Deposits for Craft Commerce
 
-Container deposits for Craft Commerce, for Ireland's Re-turn scheme or any other deposit return scheme. Each deposit goes on its own cart line, moves with the quantity, counts every container in a multipack, and stays out of VAT and your discounts.
+Container deposits for Craft Commerce, for Ireland's Re-turn scheme or any other deposit return scheme. Each deposit goes on its own cart line and follows the quantity. A multipack is charged for every container in it, and deposits are kept out of VAT and your discounts.
 
 ## Features
 
-- **Per-variant deposits**: Pick a deposit type for any variant, or for a whole product, from a custom field
-- **Auto-managed line items**: Deposits show up as their own line items and keep pace with quantity changes
-- **Admin-managed deposit list**: Keep a list of deposit tiers in the control panel (e.g. €0.15 cans, €0.25 bottles)
-- **Multipacks handled properly**: Tell it how many containers are in a unit and a 6-pack charges six deposits, a tray of 24 charges 24
-- **Tax-exempt (VAT/sales tax)**: Deposit line items sit under a dedicated "Container Deposits (No VAT)" tax category
-- **No discount leakage**: Deposits are never promotable or on sale, and they don't count toward a discount's minimum spend or quantity
-- **Product and invoice display helpers**: Twig helpers and example templates for product cards, carts, and Re-turn-shaped producer invoices and till receipts
-- **Multi-site and multi-store ready**: Deposit purchasables propagate to every site out of the box
-- **Re-turn ready**: Matches the official Irish Deposit Return Scheme structure out of the box
+- Pick a deposit type on each variant, or once on the product to cover all its variants.
+- The deposit goes on a cart line of its own and follows the quantity up and down.
+- Set your deposit amounts in the control panel, such as 15c on a can and 25c on a bottle.
+- Say how many containers are in a unit, and a 6-pack is charged six deposits and a tray of 24 is charged 24.
+- Deposits go under their own "Container Deposits (No VAT)" tax category, made when you install. They stay VAT-free as long as your tax rates are worked out per line item rather than on the order total.
+- Coupons, sales and catalog pricing rules never touch a deposit, and deposits don't count toward a discount's minimum spend or quantity.
+- Twig helpers and example templates for product cards, the cart, and producer invoices and till receipts laid out the way Re-turn asks.
+- Works across multiple sites and Commerce stores.
+- Cans and bottles inside a [Bundle Builder](https://github.com/john-henry/craft-bundle-builder) bundle are charged their deposit too.
 
 ## Documentation
 
@@ -26,7 +26,7 @@ Full documentation is at [johnhenry.ie/plugins/container-deposits/docs](https://
 ## Requirements
 
 - Craft CMS 5.0 or later
-- Craft Commerce 5.0 or later
+- Craft Commerce 5.1 or later
 - PHP 8.2 or later
 
 ## Accessibility

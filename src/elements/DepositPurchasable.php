@@ -297,7 +297,7 @@ class DepositPurchasable extends Purchasable
 
         if (!self::$_loggedMissingTaxCategory) {
             Craft::warning(sprintf(
-                'The "%s" tax category is missing, so deposits fall back to the default tax category and may be charged VAT. Reinstall the plugin or recreate the category to fix it.',
+                'The "%s" tax category is missing, so deposits fall back to the default tax category and may be charged VAT. Recreate a tax category with that handle to fix it.',
                 Install::TAX_CATEGORY_HANDLE,
             ), 'container-deposits');
             self::$_loggedMissingTaxCategory = true;

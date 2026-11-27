@@ -2,8 +2,10 @@
 {% import "_includes/forms" as forms %}
 {% set title = isNew ? "New Deposit Type"|t('container-deposits') : depositType.name %}
 
+{% set selectedSubnavItem = 'deposit-types' %}
+
 {% set crumbs = [
-    { label: "Container Deposits"|t('container-deposits'), url: url('container-deposits') },
+    { label: "Deposit Types"|t('container-deposits'), url: url('container-deposits') },
     { label: isNew ? "New Deposit Type"|t('container-deposits') : depositType.name, url: '' }
 ] %}
 
@@ -28,7 +30,7 @@
         {{ forms.textField({
             first: true,
             label: 'Name'|t('app'),
-            instructions: 'The label shown on the deposit line item in cart (e.g. "Can Deposit", "Container Deposits").'|t('container-deposits'),
+            instructions: 'Shown on the deposit line in the cart and on receipts, such as "15c" or "Can Deposit".'|t('container-deposits'),
             id: 'name',
             name: 'name',
             value: depositType.name,
@@ -39,7 +41,7 @@
 
         {{ forms.textField({
             label: 'Handle'|t('app'),
-            instructions: 'A unique identifier used internally (e.g. "canDeposit", "containerDeposit").'|t('container-deposits'),
+            instructions: 'Goes into the SKU on the deposit line, such as "deposit-smallContainer". Must be unique.'|t('container-deposits'),
             id: 'handle',
             name: 'handle',
             class: 'code',
@@ -50,7 +52,7 @@
 
         {{ forms.textField({
             label: 'Amount'|t('container-deposits'),
-            instructions: 'The deposit amount in the store currency (e.g. 0.15 for €0.15).'|t('container-deposits'),
+            instructions: 'Charged for each container, in the store\'s currency. Enter 0.15 for a 15c deposit.'|t('container-deposits'),
             id: 'amount',
             name: 'amount',
             type: 'number',

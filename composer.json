@@ -2,7 +2,7 @@
   "name": "johnhenry/craft-container-deposits",
   "description": "Container deposits for Craft Commerce, each on its own cart line and kept out of VAT and discounts. Set up for Ireland's Re-turn scheme.",
   "type": "craft-plugin",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "keywords": [
     "craft-commerce",
     "container deposits",
@@ -28,7 +28,7 @@
   "require": {
     "php": "^8.2 || ^8.3 || ^8.4",
     "craftcms/cms": "^5.0",
-    "craftcms/commerce": "^5.0"
+    "craftcms/commerce": "^5.1"
   },
   "require-dev": {
     "craftcms/ecs": "dev-main",
